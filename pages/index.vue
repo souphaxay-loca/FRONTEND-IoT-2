@@ -3,12 +3,12 @@
   <NuxtLayout name="default">
     <div class="min-h-screen bg-gray-50">
       <!-- Connection Status Indicator -->
-      <div class="p-4">
+      <!-- <div class="p-4">
         <span v-if="isConnected" class="text-green-600 font-bold">
           Connected
         </span>
         <span v-else class="text-red-600 font-bold"> Disconnected </span>
-      </div>
+      </div> -->
       <!-- Status Cards Grid -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
         <DashboardStatusCard
