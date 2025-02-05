@@ -1,7 +1,14 @@
-// index as dashboard
+<!-- pages/index.vue -->
 <template>
   <NuxtLayout name="default">
     <div class="min-h-screen bg-gray-50">
+      <!-- Connection Status Indicator -->
+      <div class="p-4">
+        <span v-if="isConnected" class="text-green-600 font-bold">
+          Connected
+        </span>
+        <span v-else class="text-red-600 font-bold"> Disconnected </span>
+      </div>
       <!-- Status Cards Grid -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
         <DashboardStatusCard
@@ -29,17 +36,18 @@
     </div>
   </NuxtLayout>
 </template>
-
-<script setup>
+  
+  <script setup>
 import { ref, onMounted } from "vue";
 import { useSocket } from "~/composables/useSocket";
 import { useSensorData } from "~/composables/useSensorData";
 import { useGraphData } from "~/composables/useGraphData";
 
 const socket = useSocket();
-const { fetchLatestData, fetchAllData } = useSensorData();
+const { fetchAllData } = useSensorData();
 const { addDataPoint, getFormattedData } = useGraphData();
 
+// Define reactive state for current values and graph data
 const currentValues = ref({
   temperature: 0,
   humidity: 0,
@@ -67,7 +75,7 @@ const sensors = [
   },
   {
     id: "mq3",
-    title: "Air Quality",
+    title: "Alcohol Concentration",
     unit: "ppm",
     thresholds: { min: 0, max: 50 },
   },
@@ -87,22 +95,32 @@ const getTrend = (sensorId) => {
   return last > previous ? "up" : last < previous ? "down" : "stable";
 };
 
+const maxRecords = 100; // Limit to last 100 records
+
 onMounted(async () => {
-  // Fetch the initial data set
-  const initialData = await fetchLatestData();
-  if (initialData) {
-    currentValues.value = {
-      temperature: initialData.temperature,
-      humidity: initialData.humidity,
-      mq3: initialData.mq3,
-    };
-    addDataPoint(initialData);
+  // Fetch all historical data
+  const allData = await fetchAllData();
+  if (allData && Array.isArray(allData)) {
+    // Keep only the last maxRecords (e.g., 100) entries
+    const limitedData = allData.slice(-maxRecords);
+    // Add each record to the graph's data store
+    limitedData.forEach((dataPoint) => {
+      addDataPoint(dataPoint);
+    });
+    // Update the graph data for each sensor
     sensors.forEach((sensor) => {
       sensorData.value[sensor.id] = getFormattedData(sensor.id);
     });
+    // Update current values to the latest record
+    const latest = limitedData[limitedData.length - 1];
+    currentValues.value = {
+      temperature: latest.temperature,
+      humidity: latest.humidity,
+      mq3: latest.mq3,
+    };
   }
 
-  // Listen to socket updates
+  // Listen to real-time socket updates
   socket.socket.value.on("new-data", (data) => {
     console.log("New data received:", data);
     currentValues.value = {
@@ -121,3 +139,4 @@ definePageMeta({
   layout: "default",
 });
 </script>
+  

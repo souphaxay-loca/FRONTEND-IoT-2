@@ -29,7 +29,7 @@ export default defineNuxtConfig({
     public: {
       // Use the provided online API URL by default.
       apiUrl: process.env.NUXT_PUBLIC_API_URL || 'https://backend-iot-t13g.onrender.com',
-      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || 'http://localhost:3999',
+      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || 'https://backend-iot-t13g.onrender.com',
       env: process.env.NODE_ENV || 'development'
     }
   }

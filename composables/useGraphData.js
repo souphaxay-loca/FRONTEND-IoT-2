@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 
 export const useGraphData = () => {
   const chartData = ref([])
-  const maxDataPoints = 50 // Maximum number of points to show on graph
+  const maxDataPoints = 20 // Maximum number of points to show on graph
 
   // Process new data point
   const addDataPoint = (newData) => {
@@ -23,7 +23,7 @@ export const useGraphData = () => {
   // Get formatted data for specific sensor
   const getFormattedData = (sensorId) => {
     return chartData.value.map(data => ({
-      timestamp: new Date(data.timestamp).toLocaleTimeString(),
+      timestamp: new Date(data.timestamp),
       value: data[sensorId]
     }))
   }
