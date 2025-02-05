@@ -27,6 +27,7 @@ export const useGraphData = () => {
       value: data[sensorId]
     }))
   }
+  
 
   // Get min/max values for a sensor
   const getDataRange = (sensorId) => {

@@ -1,46 +1,42 @@
 // composables/useSensorData.js
 import { ref } from 'vue'
+import { useRuntimeConfig } from '#imports'
 
 export const useSensorData = () => {
   const loading = ref(false)
   const error = ref(null)
+  const config = useRuntimeConfig()
 
-  // Fetch latest sensor data
-  const fetchLatestData = async () => {
+  // Fetch all sensor data from the API endpoint.
+  // This URL will be `${config.public.apiUrl}/api/sensor-data`
+  const fetchAllData = async () => {
     loading.value = true
     try {
-      const response = await fetch('http://localhost:3999/api/sensor-data')
+      const response = await fetch(`${config.public.apiUrl}/api/sensor-data`)
       const data = await response.json()
       loading.value = false
-      return data
+      return data  // Returns an array of sensor data objects.
     } catch (err) {
       error.value = err.message
       loading.value = false
       console.error('Error fetching sensor data:', err)
-      return null
+      return []
     }
   }
 
-  // Fetch historical data with date range
-  const fetchHistoricalData = async (startDate, endDate) => {
-    loading.value = true
-    try {
-      const response = await fetch(`http://localhost:3999/api/sensor-data?startDate=${startDate}&endDate=${endDate}`)
-      const data = await response.json()
-      loading.value = false
-      return data
-    } catch (err) {
-      error.value = err.message
-      loading.value = false
-      console.error('Error fetching historical data:', err)
-      return []
+  // Optionally, if you want the latest data point:
+  const fetchLatestData = async () => {
+    const data = await fetchAllData()
+    if (Array.isArray(data) && data.length > 0) {
+      return data[data.length - 1]
     }
+    return null
   }
 
   return {
     loading,
     error,
-    fetchLatestData,
-    fetchHistoricalData
+    fetchAllData,
+    fetchLatestData
   }
 }

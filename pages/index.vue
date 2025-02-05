@@ -1,3 +1,4 @@
+// index as dashboard
 <template>
   <NuxtLayout name="default">
     <div class="min-h-screen bg-gray-50">
@@ -36,10 +37,9 @@ import { useSensorData } from "~/composables/useSensorData";
 import { useGraphData } from "~/composables/useGraphData";
 
 const socket = useSocket();
-const { fetchLatestData } = useSensorData();
+const { fetchLatestData, fetchAllData } = useSensorData();
 const { addDataPoint, getFormattedData } = useGraphData();
 
-// Reactive state
 const currentValues = ref({
   temperature: 0,
   humidity: 0,
@@ -52,7 +52,6 @@ const sensorData = ref({
   mq3: [],
 });
 
-// Sensor configurations
 const sensors = [
   {
     id: "temperature",
@@ -74,30 +73,22 @@ const sensors = [
   },
 ];
 
-// Methods
 const getStatus = (sensorId) => {
   const value = currentValues.value[sensorId];
   const threshold = sensors.find((s) => s.id === sensorId).thresholds;
-
-  if (value < threshold.min || value > threshold.max) {
-    return "warning";
-  }
-  return "normal";
+  return value < threshold.min || value > threshold.max ? "warning" : "normal";
 };
 
 const getTrend = (sensorId) => {
   const data = sensorData.value[sensorId];
   if (data.length < 2) return "stable";
-
   const last = data[data.length - 1];
   const previous = data[data.length - 2];
-
-  if (last > previous) return "up";
-  if (last < previous) return "down";
-  return "stable";
+  return last > previous ? "up" : last < previous ? "down" : "stable";
 };
 
 onMounted(async () => {
+  // Fetch the initial data set
   const initialData = await fetchLatestData();
   if (initialData) {
     currentValues.value = {
@@ -106,17 +97,23 @@ onMounted(async () => {
       mq3: initialData.mq3,
     };
     addDataPoint(initialData);
+    sensors.forEach((sensor) => {
+      sensorData.value[sensor.id] = getFormattedData(sensor.id);
+    });
   }
 
-  // Subscribe to real-time updates
+  // Listen to socket updates
   socket.socket.value.on("new-data", (data) => {
-    console.log("New data received:", data); // Add logging
+    console.log("New data received:", data);
     currentValues.value = {
       temperature: data.temperature,
       humidity: data.humidity,
       mq3: data.mq3,
     };
     addDataPoint(data);
+    sensors.forEach((sensor) => {
+      sensorData.value[sensor.id] = getFormattedData(sensor.id);
+    });
   });
 });
 

@@ -12,7 +12,7 @@
       <!-- Logo and Title -->
       <div class="p-4 border-b border-gray-700 flex items-center space-x-3">
         <LayoutDashboard class="w-6 h-6 text-blue-400" />
-        <h1 class="text-xl font-bold">IoT Monitor</h1>
+        <h1 class="text-xl font-bold" :class="isOpen ? 'pl-4 pt-2' : ''">IoT Monitor</h1>
       </div>
 
       <!-- Navigation Links -->
@@ -34,7 +34,7 @@
     <!-- Mobile Menu Toggle Button -->
     <button
       @click="$emit('toggle-menu')"
-      class="fixed top-4 left-4 p-2 rounded-md bg-gray-800 text-white lg:hidden z-50"
+      class="fixed top-4 left-4 p-2 rounded-md bg-white text-grey-800 lg:hidden z-50"
       aria-label="Toggle Menu"
     >
       <Menu v-if="!isOpen" class="w-6 h-6" />

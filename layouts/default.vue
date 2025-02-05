@@ -9,7 +9,7 @@
       <!-- Header -->
       <header class="bg-white shadow px-4 py-4 relative z-20">
         <div class="max-w-7xl mx-auto">
-          <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <h1 class="text-2xl font-bold text-gray-900">{{ pageTitle }}</h1>
         </div>
       </header>
 
@@ -22,11 +22,28 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
+import { useRoute } from "vue-router";
 import Navigation from "~/components/layout/Navigation.vue";
+
+const route = useRoute();
 
 // Initialize with false, then update on mount
 const isOpen = ref(false);
+
+// Compute page title based on current route
+const pageTitle = computed(() => {
+  switch (route.path) {
+    case '/':
+      return 'Dashboard';
+    case '/historical':
+      return 'Historical Data';
+    case '/reports':
+      return 'Reports';
+    default:
+      return 'Dashboard';
+  }
+});
 
 onMounted(() => {
   // Update the value based on screen size only when component is mounted

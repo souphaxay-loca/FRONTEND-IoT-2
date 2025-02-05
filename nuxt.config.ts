@@ -1,6 +1,5 @@
+// nuxt.config.js
 import tailwindcss from "@tailwindcss/vite";
-
-// https://nuxt.com/docs/api/configuration/nuxt-config
 
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
@@ -28,6 +27,8 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
+      // Use the provided online API URL by default.
+      apiUrl: process.env.NUXT_PUBLIC_API_URL || 'https://backend-iot-t13g.onrender.com',
       socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || 'http://localhost:3999',
       env: process.env.NODE_ENV || 'development'
     }
