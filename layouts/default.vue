@@ -9,7 +9,7 @@
       <!-- Header -->
       <header class="bg-white shadow px-4 py-4 relative z-20">
         <div class="max-w-7xl mx-auto">
-          <h1 class="text-2xl font-bold text-gray-900">{{ pageTitle }} - Prototype</h1>
+          <h1 class="text-2xl font-bold text-gray-900 text-center md:text-left">{{ pageTitle }} - Prototype</h1>
         </div>
       </header>
 

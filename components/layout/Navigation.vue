@@ -21,7 +21,7 @@
           v-for="item in navigationItems"
           :key="item.path"
           :to="item.path"
-          class="block px-4 py-3 hover:bg-gray-700 transition-colors duration-200 flex items-center space-x-3"
+          class="px-4 py-3 hover:bg-gray-700 transition-colors duration-200 flex items-center space-x-3"
           :class="{ 'bg-gray-700': isCurrentRoute(item.path) }"
           @click="$emit('toggle-menu')"
         >
