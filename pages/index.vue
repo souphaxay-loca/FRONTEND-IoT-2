@@ -2,13 +2,38 @@
 <template>
   <NuxtLayout name="default">
     <div class="min-h-screen bg-gray-50">
-      <!-- Connection Status Indicator -->
-      <!-- <div class="p-4">
-        <span v-if="isConnected" class="text-green-600 font-bold">
-          Connected
-        </span>
-        <span v-else class="text-red-600 font-bold"> Disconnected </span>
-      </div> -->
+      <!-- Add Device Status Indicator using check-devices data -->
+      <div class="p-4">
+        <div class="bg-white rounded-lg shadow p-4 mb-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <div
+                :class="[
+                  'w-3 h-3 rounded-full',
+                  deviceStats.activeDevices > 0 ? 'bg-green-500' : 'bg-red-500',
+                ]"
+              ></div>
+              <span class="font-medium">
+                Device Status:
+                <span
+                  :class="
+                    deviceStats.activeDevices > 0
+                      ? 'text-green-600'
+                      : 'text-red-600'
+                  "
+                >
+                  {{ deviceStats.activeDevices > 0 ? "Online" : "Offline" }}
+                </span>
+              </span>
+            </div>
+            <div class="text-sm text-gray-500">
+              Active Devices: {{ deviceStats.activeDevices }}/{{
+                deviceStats.totalDevices
+              }}
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- Status Cards Grid -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
         <DashboardStatusCard
@@ -19,6 +44,7 @@
           :unit="sensor.unit"
           :status="getStatus(sensor.id)"
           :trend="getTrend(sensor.id)"
+          :is-device-online="deviceStats.activeDevices > 0"
         />
       </div>
 
@@ -42,10 +68,12 @@ import { ref, onMounted } from "vue";
 import { useSocket } from "~/composables/useSocket";
 import { useSensorData } from "~/composables/useSensorData";
 import { useGraphData } from "~/composables/useGraphData";
+import { useDevice } from "~/composables/useDevice";
 
 const socket = useSocket();
 const { fetchAllData } = useSensorData();
 const { addDataPoint, getFormattedData } = useGraphData();
+const { deviceStats, checkDevices } = useDevice();
 
 // Define reactive state for current values and graph data
 const currentValues = ref({
@@ -98,6 +126,13 @@ const getTrend = (sensorId) => {
 const maxRecords = 100; // Limit to last 100 records
 
 onMounted(async () => {
+  // fetch device status
+  await checkDevices();
+  // Set up periodic device status checking (every 30 seconds)
+  const deviceCheckInterval = setInterval(async () => {
+    await checkDevices();
+  }, 30000);
+
   // Fetch all historical data
   const allData = await fetchAllData();
   if (allData && Array.isArray(allData)) {
@@ -122,6 +157,7 @@ onMounted(async () => {
 
   // Listen to real-time socket updates
   socket.socket.value.on("new-data", (data) => {
+  if (deviceStats.value.activeDevices > 0) {
     console.log("New data received:", data);
     currentValues.value = {
       temperature: data.temperature,
@@ -132,6 +168,14 @@ onMounted(async () => {
     sensors.forEach((sensor) => {
       sensorData.value[sensor.id] = getFormattedData(sensor.id);
     });
+  } else {
+    console.log("Device is offline, ignoring new data");
+  }
+});
+
+  // Clean up interval on component unmount
+  onUnmounted(() => {
+    clearInterval(deviceCheckInterval);
   });
 });
 
