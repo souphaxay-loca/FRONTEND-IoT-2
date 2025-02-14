@@ -3,6 +3,17 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
+  app: {
+    head: {
+        title: "IoT Real-Time Monitoring",
+        meta: [
+            { name: "description", content: "IoT Dashboard for monitoring devices and sensors" }
+        ],
+        link: [
+          {rel: 'icon', type: 'image/png', href: '/meme.png'}
+        ]
+    }
+  },
   devtools: { enabled: false },
   css: ["~/assets/css/main.css"],
   vite: { plugins: [tailwindcss()] },
